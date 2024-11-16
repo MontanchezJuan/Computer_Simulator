@@ -35,8 +35,13 @@ const nodeTypes = {
 export const Components = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { currentComponent, currentValue, lastComponent, registerBank } =
-    useStore((store) => store.currentinstruction);
+  const {
+    currentComponent,
+    currentCycle,
+    currentValue,
+    lastComponent,
+    registerBank,
+  } = useStore((store) => store.currentinstruction);
 
   useEffect(() => {
     setNodes((nds) =>
@@ -109,6 +114,7 @@ export const Components = () => {
           <Background />
         </ReactFlow>
       </div>
+      <h1>Ciclo actual: {currentCycle}</h1>
       <button onClick={() => moveInstruction("AL", 1)}>click</button>
     </>
   );
