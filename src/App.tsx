@@ -1,11 +1,13 @@
 import { Components } from "./components/Components";
-import { Interpreter } from "./components/Interpreter";
+import { Program } from "./components/program/Program";
 
 function App() {
   return (
-    <div>
-      <Components />
-      <Interpreter />
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="flex w-full max-w-[1600px] justify-between gap-4 p-8">
+        <Program />
+        <Components />
+      </div>
     </div>
   );
 }

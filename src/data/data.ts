@@ -32,29 +32,29 @@ export const initialNodes: Node[] = [
   {
     id: "DB",
     type: "BusNode",
-    position: { x: 550, y: 200 },
+    position: { x: 550, y: 10 },
     data: { label: "DB", value: "00000000", active: false },
     draggable: false,
   },
   {
     id: "AB",
     type: "BusNode",
-    position: { x: 700, y: 100 },
+    position: { x: 700, y: 10 },
     data: { label: "AB", value: "00000000", active: false },
     draggable: false,
   },
   {
     id: "CB",
     type: "BusNode",
-    position: { x: 850, y: 0 },
+    position: { x: 850, y: 10 },
     data: { label: "CB", value: "00000000", active: false },
     draggable: false,
   },
   {
-    id: "BR",
+    id: "RegisterBank",
     type: "RegisterBankNode",
     position: { x: -60, y: 170 },
-    data: { label: "BR", value: "00000000", active: false },
+    data: { label: "Register Bank", active: false },
     draggable: false,
   },
   {
@@ -63,7 +63,7 @@ export const initialNodes: Node[] = [
     position: { x: 10, y: 60 },
     data: { label: "AL", value: "00000000", active: false },
     draggable: false,
-    parentId: "BR",
+    parentId: "RegisterBank",
     extent: "parent",
   },
   {
@@ -72,7 +72,7 @@ export const initialNodes: Node[] = [
     position: { x: 10, y: 120 },
     data: { label: "BL", value: "00000000", active: false },
     draggable: false,
-    parentId: "BR",
+    parentId: "RegisterBank",
     extent: "parent",
   },
   {
@@ -81,7 +81,7 @@ export const initialNodes: Node[] = [
     position: { x: 10, y: 180 },
     data: { label: "CL", value: "00000000", active: false },
     draggable: false,
-    parentId: "BR",
+    parentId: "RegisterBank",
     extent: "parent",
   },
   {
@@ -90,7 +90,7 @@ export const initialNodes: Node[] = [
     position: { x: 10, y: 240 },
     data: { label: "DL", value: "00000000", active: false },
     draggable: false,
-    parentId: "BR",
+    parentId: "RegisterBank",
     extent: "parent",
   },
   {
