@@ -91,8 +91,8 @@ export const Components = () => {
   }, [currentComponent, currentValue, setNodes]);
 
   return (
-    <>
-      <div style={{ width: "100%", height: "400px" }}>
+    <div className="flex flex-col">
+      <div className="h-[80%] w-[800px]">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -101,21 +101,13 @@ export const Components = () => {
           fitView
           nodeTypes={nodeTypes}
           nodesDraggable={false}
-          panOnDrag={false}
-          zoomOnScroll={false}
-          zoomOnPinch={false}
-          zoomOnDoubleClick={false}
         >
-          <Controls
-            style={{ color: "black" }}
-            showInteractive={false}
-            showZoom={false}
-          />
+          <Controls style={{ color: "black" }} showInteractive={false} />
           <Background />
         </ReactFlow>
       </div>
       <h1>Ciclo actual: {currentCycle}</h1>
-      <button onClick={() => moveInstruction("AL", 1)}>click</button>
-    </>
+      <button onClick={() => moveInstruction("AL", 1)}>Run</button>
+    </div>
   );
 };

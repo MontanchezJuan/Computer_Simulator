@@ -167,7 +167,7 @@ export const BusNode: React.FC<ComputerNodeProps> = ({ data }) => {
   const nodeStyle: React.CSSProperties = {
     ...globalNodeStyle,
     border: `2px solid ${active ? "rgb(158, 118, 255)" : "gray"}`,
-    height: "270px",
+    height: "450px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
