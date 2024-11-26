@@ -2,13 +2,15 @@ import { v4 as uuidv4 } from "uuid";
 import { StateCreator } from "zustand";
 import { CODOPS } from "../interfaces/CODOP";
 
+export type TypeOperand = "Number" | "Register";
+
 export interface ProgramItem {
   codop: keyof typeof CODOPS;
   id: string;
   operand1: string;
   operand2: string;
-  type1: string;
-  type2: string;
+  type1: TypeOperand;
+  type2: TypeOperand;
 }
 
 export interface ProgramSlice {
