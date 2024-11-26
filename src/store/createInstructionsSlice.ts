@@ -5,12 +5,13 @@ import { Register } from "../interfaces/RegisterBank";
 
 interface Instruction {
   counter: number;
-  currentComponent: PCComponent;
+  currentComponent: PCComponent | null;
   currentCycle: Cycles;
-  currentValue: string | number;
-  lastComponent: PCComponent;
+  currentValue: number;
+  lastComponent: PCComponent | null;
   registerBank: Record<Register, number>;
   timeout: number;
+  aluParameters: Record<string, number>;
 }
 
 // funciones y variables que se van a utilizar
@@ -20,19 +21,20 @@ export interface InstructionsSlice {
   setCurrentCycle: (value: Cycles) => void;
   setRegisterValue: (register: Register, value: number) => void;
   setTimeout: (value: number) => void;
-  setValue: (value: string | number) => void;
+  setValue: (value: number) => void;
   incrementCounter: () => void;
 }
 
 // valores iniciales de las variables
 const initialInstructions: Instruction = {
   counter: 0,
-  currentComponent: "PC",
+  currentComponent: null,
   currentCycle: "FI",
-  currentValue: "00000000",
-  lastComponent: "PC",
+  currentValue: 0,
+  lastComponent: null,
   registerBank: { AL: 0, BL: 0, CL: 0, DL: 0 },
   timeout: 1000,
+  aluParameters: { A: 0, B: 0 },
 };
 
 const createInstructionsSlice: StateCreator<InstructionsSlice> = (set) => ({
@@ -49,7 +51,7 @@ const createInstructionsSlice: StateCreator<InstructionsSlice> = (set) => ({
     })),
 
   // Setear que valor se mostrara al usuario sobre el componente en ese momento
-  setValue: (value: string | number) =>
+  setValue: (value: number) =>
     set((state) => ({
       currentinstruction: {
         ...state.currentinstruction,
@@ -74,7 +76,17 @@ const createInstructionsSlice: StateCreator<InstructionsSlice> = (set) => ({
         currentCycle: value,
       },
     })),
-
+  // setear el valor de la ALU
+  setAluParameters: (parameter: string, value: number) =>
+    set((state) => ({
+      currentinstruction: {
+        ...state.currentinstruction,
+        aluParameters: {
+          ...state.currentinstruction.aluParameters,
+          [parameter]: value,
+        },
+      },
+    })),
   // setear el valor de los registros VU (AL, BL, CL, DL)
   setRegisterValue: (register: Register, value: number) =>
     set((state) => ({
@@ -94,7 +106,7 @@ const createInstructionsSlice: StateCreator<InstructionsSlice> = (set) => ({
         currentinstruction: {
           ...state.currentinstruction,
           counter: newCounter,
-          currentValue: newCounter.toString(2).padStart(8, "0"),
+          currentValue: newCounter,
         },
       };
     }),
