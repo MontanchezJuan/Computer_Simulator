@@ -1,7 +1,7 @@
 import useStore from "../store/useStore";
 import { functionTime } from "../utils/actions";
-import { addInstruction } from "./addInstruction";
 import { moveInstruction } from "./moveInstruction";
+import { operationsInstructions } from "./operationsInstructions";
 
 export const run = async () => {
   const instructions = useStore.getState().items;
@@ -89,25 +89,22 @@ export const run = async () => {
     const { codop, operand1, type1, operand2, type2 } = instruction;
 
     switch (codop) {
-      case "ADD":
-        addInstruction(operand1, operand2, type1, type2);
-        break;
       case "MOV":
         moveInstruction(operand1, operand2);
         break;
+      case "ADD":
+        operationsInstructions(codop, operand1, operand2, type1, type2);
+        break;
       case "DEC":
-        //moveInstruction(operand1, operand2, type1, type2);
+        operationsInstructions(codop, operand1, operand2, type1, type2);
         break;
       case "DIV":
-        //moveInstruction(operand1, operand2, type1, type2);
+        operationsInstructions(codop, operand1, operand2, type1, type2);
         break;
       case "MUL":
-        //moveInstruction(operand1, operand2, type1, type2);
+        operationsInstructions(codop, operand1, operand2, type1, type2);
         break;
       case "CMP":
-        //moveInstruction(operand1, operand2, type1, type2);
-        break;
-      case "DEC":
         //moveInstruction(operand1, operand2, type1, type2);
         break;
       case "JMP":
