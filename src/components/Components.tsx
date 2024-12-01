@@ -9,7 +9,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useEffect } from "react";
 import { initialEdges, initialNodes } from "../data/data";
-import { moveInstruction } from "../instructions/moveInstruction";
+import { run } from "../instructions/runProgram";
 import { Register } from "../interfaces/RegisterBank";
 import useStore from "../store/useStore";
 import {
@@ -90,6 +90,10 @@ export const Components = () => {
     );
   }, [currentComponent, currentValue, setNodes]);
 
+  const handleOnClick = () => {
+    run();
+  };
+
   return (
     <div className="flex flex-col">
       <div className="h-[80%] w-[800px]">
@@ -107,7 +111,7 @@ export const Components = () => {
         </ReactFlow>
       </div>
       <h1>Ciclo actual: {currentCycle}</h1>
-      <button onClick={() => moveInstruction("AL", 1)}>Run</button>
+      <button onClick={handleOnClick}>Run</button>
     </div>
   );
 };
