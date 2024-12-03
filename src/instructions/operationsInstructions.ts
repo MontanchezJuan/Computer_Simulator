@@ -1,124 +1,198 @@
+import { PCComponent } from "../interfaces/Component";
 import { Register } from "../interfaces/RegisterBank";
 import { TypeOperand } from "../store/createProgramSlice";
 import useStore from "../store/useStore";
+import { functionTime } from "../utils/actions";
 
 // INSTRUCCIÓN ADD
 export const operationsInstructions = async (
   codop: "ADD" | "DEC" | "DIV" | "MUL",
   operand1: string,
   operand2: string,
-  type1: TypeOperand,
   type2: TypeOperand,
 ) => {
-  const store = useStore.getState();
-  // no hay CO ni FO
-  //24- se muestra el valor de la direccion “00000000” (AL) en el banco de registros (en este caso sería | AL | valor en binario | )
-  store.setComponent("BR");
-  store.setValue(Number(operand1));
+  //CO-FO primer dato
+  //-1 Iluminar arista UC, BR primer dato
+  await functionTime(() => {
+    // EI - Execute Instruction
+    useStore.getState().setCurrentCycle("EI");
+    useStore.getState().setComponents("UC", operand1 as PCComponent);
+  });
 
-  //--> Si el segundo operando es un registro
-  //25- se muestra el valor de la direccion “00000001” (BL) en el banco de registros (en este caso sería | BL | valor en binario | )
-  if (type2 === "Register") {
-    store.setComponent("BR");
-    store.setValue(Number(operand2));
-    // --> Si el segundo opernado es un dato directo
-    // no hacer nada, pasar a lo siguiente
-  } else {
-    store.setComponent("ALU");
-    store.setValue(Number(operand2));
+  await functionTime(() => {
+    useStore.getState().setComponents(operand1 as PCComponent, "ALU");
+    useStore
+      .getState()
+      .setALUValue(
+        "A",
+        useStore.getState().COMPUTER.RegisterBank[operand1 as Register],
+      );
+  });
+
+  //CO-FO segundo dato
+  // Si es un registro -->
+  // -2 Iluminar arista UC, BR segundo dato
+  // Si es un dato directo -->
+  // No hacer nada
+
+  //Si el segundo operando que le entró al ADD es un registro ->
+  switch (type2) {
+    case "REGISTER":
+      {
+        await functionTime(() => {
+          useStore.getState().setComponents("UC", operand2 as PCComponent);
+        });
+
+        // -3 setear ciclo EI
+        // -4 Iluminar arista BR, ALU
+        // -5 Dentro de la ALU, mostrar el valor de “primer dato” (con el valor en binario de AL)
+        // -6 Dentro de la ALU, mostrar el valor de “segundo dato” (con el valor en binario de BL)
+        // -7 se muestra el resultado de la suma en la cajita de resultado de la ALU
+        // -8 Si el resultado es igual a cero, poner en true la flag de zero e iluminar arista ALU, PSW
+        // -9 Si el resultado es mayor a 255, poner en true la flag de nan e iluminar arista ALU, PSW
+        await functionTime(() => {
+          useStore.getState().setComponents(operand2 as PCComponent, "ALU");
+          useStore
+            .getState()
+            .setALUValue(
+              "B",
+              useStore.getState().COMPUTER.RegisterBank[operand2 as Register],
+            );
+        });
+      }
+      break;
+    case "NUMBER":
+      {
+        await functionTime(() => {
+          useStore.getState().setComponents("UC", "ALU");
+          useStore.getState().setALUValue("B", Number(operand2));
+        });
+      }
+      break;
+    default:
+      break;
   }
-
-  //Cambiar ciclo
-
-  store.setCurrentCycle("EI");
-  if (type2 === "Register") {
-    store.setComponent("ALU");
-    store.setValue(Number(operand1));
-    store.setValue(Number(operand2));
-  } else {
-    store.setComponent("ALU");
-    store.setValue(Number(operand1));
-    store.setComponent("UC");
-    store.setValue(Number(operand2));
-  }
-  /*
-  se ilumina la ALU
-  Dentro de la ALU, mostrar el valor de “primer dato” (con el valor en binario de AL)
-  se ilumina UC
-  Dentro de la ALU, mostrar el valor de “segundo dato” (con el valor en binario de BL)
-  */
 
   switch (codop) {
     case "ADD":
-      store.setValue(Number(operand1) + Number(operand2));
-      // agregar el valor de la suma al registro
-      store.setRegisterValue(
-        operand1 as Register,
-        Number(operand1) + Number(operand2),
-      );
+      {
+        useStore
+          .getState()
+          .setALUValue(
+            "result",
+            useStore.getState().COMPUTER.ALU.A +
+              useStore.getState().COMPUTER.ALU.B,
+          );
+
+        // Actualizar el valor del operando1 con el reultado
+
+        // - Si el resultado es igual a cero, poner en true la flag de zero y se ilumina el PSW
+        // - Si el resultado es mayor a 255, poner en true la flag de nan y se ilumina el PSW
+      }
       break;
     case "DEC":
-      store.setValue(Number(operand1) - Number(operand2));
-      // agregar el valor de la resta al registro
-      store.setRegisterValue(
-        operand1 as Register,
-        Number(operand1) - Number(operand2),
-      );
+      {
+        useStore
+          .getState()
+          .setALUValue(
+            "result",
+            useStore.getState().COMPUTER.ALU.A -
+              useStore.getState().COMPUTER.ALU.B,
+          );
+      }
       break;
     case "DIV":
-      store.setValue(Number(operand1) / Number(operand2));
-      // agregar el valor de la división al registro
-      store.setRegisterValue(
-        operand1 as Register,
-        Number(operand1) / Number(operand2),
-      );
+      {
+        useStore
+          .getState()
+          .setALUValue(
+            "result",
+            useStore.getState().COMPUTER.ALU.A /
+              useStore.getState().COMPUTER.ALU.B,
+          );
+      }
       break;
     case "MUL":
-      store.setValue(Number(operand1) * Number(operand2));
-      // agregar el valor de la multiplicación al registro
-      store.setRegisterValue(
-        operand1 as Register,
-        Number(operand1) * Number(operand2),
-      );
+      {
+        useStore
+          .getState()
+          .setALUValue(
+            "result",
+            useStore.getState().COMPUTER.ALU.A *
+              useStore.getState().COMPUTER.ALU.B,
+          );
+      }
       break;
   }
 
-  //cambiar ciclo
-  store.setCurrentCycle("WO");
-  // se ilumina banco de registros
-  store.setComponent("BR");
-  //se actualiza el valor del primer operando de la instrucción ADD| AL  | nuevo valor (en binario)  |
-  store.setRegisterValue(operand1 as Register, Number(operand1));
+  // Actualizar el valor del operando1 con el reultado
+  useStore
+    .getState()
+    .setRegisterBankValue(
+      operand1 as Register,
+      useStore.getState().COMPUTER.ALU.result,
+    );
+  // - Si el resultado es igual a cero, poner en true la flag de zero y se ilumina el PSW
+  // - Si el resultado es mayor a 255, poner en true la flag de nan y se ilumina el PSW
+  if (useStore.getState().COMPUTER.ALU.result === 0) {
+    useStore.getState().setPSWValue("zero", true);
+    await functionTime(() => {
+      useStore.getState().setComponents("ALU", "PSW");
+    });
+  } else if (
+    useStore.getState().COMPUTER.ALU.result > 127 ||
+    useStore.getState().COMPUTER.ALU.result < -127
+  ) {
+    useStore.getState().setPSWValue("nan", true);
+    await functionTime(() => {
+      useStore.getState().setComponents("ALU", "PSW");
+    });
+  }
+
+  await functionTime(() => {
+    // WO
+    useStore.getState().setCurrentCycle("WO");
+    useStore.getState().setComponents("ALU", operand1 as PCComponent);
+  });
+
+  return;
 };
 
 /*
-// no hay CO ni FO
-24- se muestra el valor de la direccion “00000000” (AL) en el banco de registros (en este caso sería | AL | valor en binario | )
+CO-FO primer dato
+-1 Iluminar arista UC, BR primer dato
 
---> Si el segundo operando es un registro
-25- se muestra el valor de la direccion “00000001” (BL) en el banco de registros (en este caso sería | BL | valor en binario | )
---> Si el segundo opernado es un dato directo
-// no hacer nada, pasar a lo siguiente
+CO-FO segundo dato
 
+Si es un registro -->
+-2 Iluminar arista UC, BR segundo dato
+
+Si es un dato directo -->
+No hacer nada
 
 EI
---> Si el segundo operando es un registro
-26- se ilumina la ALU
-27- Dentro de la ALU, mostrar el valor de “primer dato” (con el valor en binario de AL)
-28- Dentro de la ALU, mostrar el valor de “segundo dato” (con el valor en binario de BL)
-29- se muestra el resultado de la suma en la cajita de resultado de la ALU
-30- se actualiza el valor del primer operando de la instrucción ADD  | AL  | valor |
 
+Si el segundo operando que le entró al ADD es un registro —>
+-3 setear ciclo EI
+-4 Iluminar arista BR, ALU
+-5 Dentro de la ALU, mostrar el valor de “primer dato” (con el valor en binario de AL)
+-6 Dentro de la ALU, mostrar el valor de “segundo dato” (con el valor en binario de BL)
+-7 se muestra el resultado de la suma en la cajita de resultado de la ALU
+-8 Si el resultado es igual a cero, poner en true la flag de zero e iluminar arista ALU, PSW
+-9 Si el resultado es mayor a 255, poner en true la flag de nan e iluminar arista ALU, PSW 
 
---> Si el segundo operando es un dato inmediato
-31- se ilumina la ALU
-32- Dentro de la ALU, mostrar el valor de “primer dato” (con el valor en binario de AL)
-33- se ilumina UC
-34- Dentro de la ALU, mostrar el valor de “segundo dato” (con el valor en binario de BL)
-35- se muestra el resultado de la suma en la cajita de resultado de la ALU
-36- se actualiza el valor del primer operando de la instrucción ADD  | AL  | valor |
+Si el segundo operando que le entró al ADD es un dato inmediato—>
+-3 setear ciclo EI
+-4 Iluminar arista BR, ALU
+-5 Dentro de la ALU, mostrar el valor de “primer dato” (con el valor en binario de AL)
+-5.5 Iluminar arista UC, ALU
+-6 Dentro de la ALU, mostrar el valor de “segundo dato” (con el valor en binario de BL)
+-7 se muestra el resultado de la suma en la cajita de resultado de la ALU
+-8 Si el resultado es igual a cero, poner en true la flag de zero y se ilumina el PSW
+-9 Si el resultado es mayor a 255, poner en true la flag de nan y se ilumina el PSW
 
 WO
-37- se ilumina banco de registros
-38- se actualiza el valor del primer operando de la instrucción ADD | AL  | nuevo valor (en binario)  |
+-10 setear ciclo WO
+-11 iluminar arista ALU, BR
+-12 se actualiza el valor del primer operando de la instrucción con el valor del resultado: | AL  | valor resultado operacion |
 */

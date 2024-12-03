@@ -11,7 +11,6 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import useStore from "../../store/useStore";
-import { Buttons } from "./Buttons";
 import { Container } from "./Container";
 import { Item } from "./Item";
 
@@ -53,24 +52,19 @@ export const Program = () => {
   };
 
   return (
-    <div className="flex gap-4">
-      {/* Botones para crear items */}
-      <Buttons />
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      {/* Contenedor con los items arrastrables */}
+      <Container />
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        {/* Contenedor con los items arrastrables */}
-        <Container />
-
-        {/* Mostrar el item activo durante el arrastre */}
-        <DragOverlay>
-          {activeItem ? <Item id={activeItem.id} /> : null}
-        </DragOverlay>
-      </DndContext>
-    </div>
+      {/* Mostrar el item activo durante el arrastre */}
+      <DragOverlay>
+        {activeItem ? <Item id={activeItem.id} /> : null}
+      </DragOverlay>
+    </DndContext>
   );
 };

@@ -1,115 +1,242 @@
 import { StateCreator } from "zustand";
+import { CODOPS } from "../interfaces/CODOP";
 import { PCComponent } from "../interfaces/Component";
 import { Cycles } from "../interfaces/Cycles";
 import { Register } from "../interfaces/RegisterBank";
 
-interface Instruction {
-  counter: number;
-  currentComponent: PCComponent | null;
+export interface InstructionComp {
+  codop: keyof typeof CODOPS;
+  operand1: string;
+  operand2: string;
+}
+
+export interface COMPUTER {
+  ALU: { A: number; B: number; result: number };
+  IR: InstructionComp;
+  MAR: number;
+  MBR: InstructionComp;
+  PC: number;
+  PSW: { nan: boolean; zero: boolean };
+  UC: InstructionComp;
+  RegisterBank: Record<Register, number>;
+  AB: number;
+  CB: number;
+  DB: InstructionComp;
+  currentComponent: PCComponent | string;
   currentCycle: Cycles;
-  currentValue: number;
-  lastComponent: PCComponent | null;
-  registerBank: Record<Register, number>;
+  lastComponent: PCComponent | string;
   timeout: number;
-  aluParameters: Record<string, number>;
 }
 
 // funciones y variables que se van a utilizar
 export interface InstructionsSlice {
-  currentinstruction: Instruction;
-  setComponent: (value: PCComponent) => void;
+  COMPUTER: COMPUTER;
+  setAddressBusValue: (newAddressBus: number) => void;
+  setALUValue: (to: "A" | "B" | "result", newALU: number) => void;
+  setComponents: (
+    toComponent: PCComponent | string,
+    fromComponent: PCComponent | string,
+  ) => void;
+  setControlBusValue: (newControlBus: number) => void;
   setCurrentCycle: (value: Cycles) => void;
-  setRegisterValue: (register: Register, value: number) => void;
+  setDataBusValue: (newDataBus: InstructionComp) => void;
+  setIRValue: (newIR: InstructionComp) => void;
+  setMARValue: (newMAR: number) => void;
+  setMBRValue: (newMBR: InstructionComp) => void;
+  setPCValue: (newPC: number) => void;
+  setPSWValue: (to: "nan" | "zero", newPSW: boolean) => void;
+  setRegisterBankValue: (register: Register, value: number) => void;
   setTimeout: (value: number) => void;
-  setValue: (value: number) => void;
-  incrementCounter: () => void;
+  setUCValue: (newUC: InstructionComp) => void;
+  resetCOMPUTER: () => void;
 }
 
 // valores iniciales de las variables
-const initialInstructions: Instruction = {
-  counter: 0,
-  currentComponent: null,
+const initialInstructions: COMPUTER = {
+  AB: 0,
+  CB: 0,
+  DB: {
+    codop: "START",
+    operand1: "",
+    operand2: "",
+  },
+  RegisterBank: { AL: 0, BL: 0, CL: 0, DL: 0 },
+  ALU: {
+    A: 0,
+    B: 0,
+    result: 0,
+  },
+  IR: {
+    codop: "START",
+    operand1: "",
+    operand2: "",
+  },
+  MAR: 0,
+  MBR: {
+    codop: "START",
+    operand1: "",
+    operand2: "",
+  },
+  PC: -1,
+  PSW: {
+    nan: false,
+    zero: false,
+  },
+  UC: {
+    codop: "START",
+    operand1: "",
+    operand2: "",
+  },
+  currentComponent: "",
   currentCycle: "FI",
-  currentValue: 0,
-  lastComponent: null,
-  registerBank: { AL: 0, BL: 0, CL: 0, DL: 0 },
+  lastComponent: "",
   timeout: 1000,
-  aluParameters: { A: 0, B: 0 },
 };
 
 const createInstructionsSlice: StateCreator<InstructionsSlice> = (set) => ({
-  currentinstruction: initialInstructions,
+  COMPUTER: initialInstructions,
 
-  // setear que componente se va a iluminar en ese momento
-  setComponent: (value: PCComponent) =>
+  // Setear los componentes que se van a iluminar en ese momento
+  setComponents: (toComponent, fromComponent) =>
     set((state) => ({
-      currentinstruction: {
-        ...state.currentinstruction,
-        lastComponent: state.currentinstruction.currentComponent,
-        currentComponent: value,
+      COMPUTER: {
+        ...state.COMPUTER,
+        lastComponent: toComponent,
+        currentComponent: fromComponent,
       },
     })),
 
-  // Setear que valor se mostrara al usuario sobre el componente en ese momento
-  setValue: (value: number) =>
+  // Setear el valor del AddressBus
+  setAddressBusValue: (newAddressBus) =>
     set((state) => ({
-      currentinstruction: {
-        ...state.currentinstruction,
-        currentValue: value,
+      COMPUTER: {
+        ...state.COMPUTER,
+        AB: newAddressBus,
       },
     })),
 
-  // Setear en que velocidad se va an a mostrar los pasos de la instruccion
-  setTimeout: (value: number) =>
+  // Setear el valor del ControlBus
+  setControlBusValue: (newControlBus) =>
     set((state) => ({
-      currentinstruction: {
-        ...state.currentinstruction,
+      COMPUTER: {
+        ...state.COMPUTER,
+        CB: newControlBus,
+      },
+    })),
+
+  // Setear el valor del DataBus
+  setDataBusValue: (newDataBus) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
+        DB: newDataBus,
+      },
+    })),
+
+  // Setear el valor del MAR
+  setMARValue: (newMAR) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
+        MAR: newMAR,
+      },
+    })),
+
+  // Setear el valor del MBR
+  setMBRValue: (newMBR) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
+        MBR: newMBR,
+      },
+    })),
+
+  // Setear el valor del IR
+  setIRValue: (newIR) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
+        IR: newIR,
+      },
+    })),
+
+  // Setear el valor del PC
+  setPCValue: (newPC) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
+        PC: newPC,
+      },
+    })),
+
+  // Setear el valor de la ALU
+  setALUValue: (to, newALU) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
+        ALU: {
+          ...state.COMPUTER.ALU,
+          [to]: newALU,
+        },
+      },
+    })),
+
+  // Setear el valor del PSW
+  setPSWValue: (to, newPSW) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
+        PSW: {
+          ...state.COMPUTER.PSW,
+          [to]: newPSW,
+        },
+      },
+    })),
+
+  // Setear el valor del UC
+  setUCValue: (newUC) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
+        UC: newUC,
+      },
+    })),
+
+  // Setear en qué velocidad se mostrarán los pasos de la instrucción
+  setTimeout: (value) =>
+    set((state) => ({
+      COMPUTER: {
+        ...state.COMPUTER,
         timeout: value,
       },
     })),
 
-  // setear en cual ciclo de instruccion va la instruccion (FI, DI, CO, FO...)
-  setCurrentCycle: (value: Cycles) =>
+  // Setear en cuál ciclo de instrucción va la instrucción (FI, DI, CO, FO...)
+  setCurrentCycle: (value) =>
     set((state) => ({
-      currentinstruction: {
-        ...state.currentinstruction,
+      COMPUTER: {
+        ...state.COMPUTER,
         currentCycle: value,
       },
     })),
-  // setear el valor de la ALU
-  setAluParameters: (parameter: string, value: number) =>
+
+  // Setear el valor de los registros VU (AL, BL, CL, DL)
+  setRegisterBankValue: (register, value) =>
     set((state) => ({
-      currentinstruction: {
-        ...state.currentinstruction,
-        aluParameters: {
-          ...state.currentinstruction.aluParameters,
-          [parameter]: value,
-        },
-      },
-    })),
-  // setear el valor de los registros VU (AL, BL, CL, DL)
-  setRegisterValue: (register: Register, value: number) =>
-    set((state) => ({
-      currentinstruction: {
-        ...state.currentinstruction,
-        registerBank: {
-          ...state.currentinstruction.registerBank,
+      COMPUTER: {
+        ...state.COMPUTER,
+        RegisterBank: {
+          ...state.COMPUTER.RegisterBank,
           [register]: value,
         },
       },
     })),
 
-  incrementCounter: () =>
-    set((state) => {
-      const newCounter = state.currentinstruction.counter + 1;
-      return {
-        currentinstruction: {
-          ...state.currentinstruction,
-          counter: newCounter,
-          currentValue: newCounter,
-        },
-      };
-    }),
+  // Resetear el valor del PC
+  resetCOMPUTER: () =>
+    set(() => ({
+      COMPUTER: initialInstructions,
+    })),
 });
 
 export default createInstructionsSlice;

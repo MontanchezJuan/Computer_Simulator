@@ -6,9 +6,12 @@ export type PCComponent =
   | "AB" // BUS DE DIRECCIONES
   | "DB" // DATA BASE
   | "CB" // CONTROL BASE
-  | "BR" //BANCO DE REGISTROS
+  | "AL" // Registro AL
+  | "BL" // Registro BL
+  | "CL" // Registro CL
+  | "DL" // Registro DL
   | "ALU"
   | "PSW"
-  | "PM" //PROGRAM MEMORY
+  | "PM" // PROGRAM MEMORY
   | "DM" // DATA MEMORY
   | "IR";
