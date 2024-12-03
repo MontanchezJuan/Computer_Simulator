@@ -40,9 +40,19 @@ export const Buttons = () => {
     switch (codop) {
       case "MALUMA":
         {
-          createItem({ codop, type1: "FUNCTION", operand1: "function" });
+          createItem({ codop, type1: "ASIGNFUNCTION", operand1: "function" });
         }
         break;
+        case "JNZ":
+          {
+            createItem({ codop, type1: "FUNCTION", operand1: "function" });
+          }
+          break;
+        case "JZ":
+          {
+            createItem({ codop, type1: "FUNCTION", operand1: "function" });
+          }
+          break;
 
       default:
         {

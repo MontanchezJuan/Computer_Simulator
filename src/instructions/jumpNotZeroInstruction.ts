@@ -1,7 +1,8 @@
 import useStore from "../store/useStore";
 import { functionTime } from "../utils/actions";
+import { Alert } from "../utils/swal";
 
-// INSTRUCCION MOVE
+// INSTRUCCION JUMP
 export const jumpNotZeroInstruction = async (operand1: string) => {
   await functionTime(() => {
     // EI - Execute Instruction
@@ -11,18 +12,38 @@ export const jumpNotZeroInstruction = async (operand1: string) => {
   });
 
   // Verificar si hay una flag zero
-  if (useStore.getState().COMPUTER.PSW.zero) {
+  if (!useStore.getState().COMPUTER.PSW.zero) {
     await functionTime(() => {
       //! SI NO LO ENCUENTRA PUEDE RETORNAR -1!!!!!!
+      const itemsFiltered = useStore.getState().items.filter((instruction) => instruction.type1 === "ASIGNFUNCTION")
+      if (!itemsFiltered) {
+        Alert({text: "No se encontraron instancias a funciones"})
+        useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
+        return
+      }
+      const item = itemsFiltered.find((instruction) => instruction.operand1 === operand1)
+      if (!item) {
+        Alert({text: "No se encontró la fila de memoria"})
+        useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
+        return
+      }
       const newAddress = useStore
         .getState()
-        .items.findIndex((instruction) => instruction.operand1 === operand1);
-      console.log(newAddress);
+        .items.findIndex((instruction) => instruction.id === item?.id);
+      if (!newAddress) {
+        Alert({text: "No se encontró la dirección de la función"})
+        useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
+        return
+      }
+      console.log(newAddress); 
 
       useStore.getState().setComponents("UC", "PC");
       useStore.getState().setPCValue(newAddress + 1);
+          
+        
+      
     });
-  } else if (!useStore.getState().COMPUTER.PSW.zero) {
+  } else if (useStore.getState().COMPUTER.PSW.zero) {
     await functionTime(() => {
       useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
     });
