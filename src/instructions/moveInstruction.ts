@@ -1,23 +1,28 @@
+import { PCComponent } from "../interfaces/Component";
 import { Register } from "../interfaces/RegisterBank";
 import useStore from "../store/useStore";
 import { functionTime } from "../utils/actions";
 
 // INSTRUCCION MOVE
 export const moveInstruction = async (register: string, value: string) => {
-  const store = useStore.getState();
-
   await functionTime(() => {
-    // se pasa al ciclo EI
+    // EI - Execute Instruction
+    useStore.getState().setCurrentCycle("EI");
     // 18- se ilumina el banco de registros
     // 19- aparece el dato en el banco de registros (00000000 | 00000101) que seria "|AL | 5 |"
     // finalmente se asigna el valor de AL y se guarda
-    store.setCurrentCycle("EI");
-    store.setComponent("BR");
+    useStore.getState().setComponents("UC", register as PCComponent);
     // store.setValue(
     //   `|${RegisterAddress[register]} | ${(value)}|`,
     // );  MONTANCHEX RESUELVE
-    store.setRegisterValue(register as Register, Number(value));
+    useStore
+      .getState()
+      .setRegisterBankValue(register as Register, Number(value));
   });
+
+  // Siguiente instrucción
+  // useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
+  return;
 };
 
 /*

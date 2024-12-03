@@ -15,6 +15,7 @@ export const SortableItem = ({ id }: SortableItemProps) => {
     });
 
   const handleRemove = useStore((store) => store.handleRemove);
+  const isProgamRunning = useStore((store) => store.isProgamRunning);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -28,7 +29,12 @@ export const SortableItem = ({ id }: SortableItemProps) => {
     <div ref={setNodeRef} className="flex p-2" style={style}>
       <Item id={id}>
         {/* Botón de arrastre */}
-        <button className={baseClasses} {...listeners} {...attributes}>
+        <button
+          disabled={isProgamRunning}
+          className={baseClasses}
+          {...listeners}
+          {...attributes}
+        >
           <RiDragMove2Line />
         </button>
 
@@ -36,6 +42,7 @@ export const SortableItem = ({ id }: SortableItemProps) => {
         <button
           className={`${baseClasses} hover:text-red-400`}
           onClick={() => handleRemove(id)}
+          disabled={isProgamRunning}
         >
           <RiDeleteBin2Line />
         </button>

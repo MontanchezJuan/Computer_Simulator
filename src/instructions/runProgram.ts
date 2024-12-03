@@ -1,120 +1,122 @@
+import { InstruccionesControl } from "../interfaces/CODOP";
 import useStore from "../store/useStore";
 import { functionTime } from "../utils/actions";
-import { addInstruction } from "./addInstruction";
+import { jumpNotZeroInstruction } from "./jumpNotZeroInstruction";
+import { malumaInstruction } from "./malumaInstruction";
 import { moveInstruction } from "./moveInstruction";
+import { operationsInstructions } from "./operationsInstructions";
 
 export const run = async () => {
   const instructions = useStore.getState().items;
-  const store = useStore.getState();
+
+  useStore.getState().resetCOMPUTER();
 
   do {
-    const instruction = instructions[store.currentinstruction.counter];
+    // Siguiente instrucción
+    useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
 
-    // FI - Fetch Instruction
+    const instruction = instructions[useStore.getState().COMPUTER.PC];
+    // El MALUMA si utiliza el type1
+    const { id, codop, operand1, type1, operand2, type2 } = instruction;
+
     await functionTime(() => {
+      // FI - Fetch Instruction
+      useStore.getState().setCurrentCycle("FI");
       // 1- Iluminar PC
       // 2- Mostrar #dirección (del COODOP REGISTER, REGISTER) en cajita de PC (00000011)
-      store.setComponent("PC");
-      store.setValue(store.currentinstruction.counter);
-    });
-
-    await functionTime(() => {
-      // 3- Mostrar la dirección en MAR
-      // 6 - Mostrar #dirección en cajita de MAR
-      store.setComponent("MAR");
-      store.setValue(store.currentinstruction.counter);
-    });
-
-    await functionTime(() => {
-      // 7- Iluminar UC
-      store.setComponent("UC");
-    });
-
-    await functionTime(() => {
-      // 8- Iluminar bus de control y mostrar 01 que significa “solicitar instrucción”
-      store.setComponent("CB");
-      store.setValue(1);
+      useStore.getState().setComponents("PC", "MAR");
+      useStore.getState().setMARValue(useStore.getState().COMPUTER.PC);
     });
 
     await functionTime(() => {
       // 9- iluminar MAR
-      store.setComponent("MAR");
-      store.setValue(store.currentinstruction.counter);
+      useStore.getState().setComponents("MAR", "AB");
+      useStore.getState().setAddressBusValue(useStore.getState().COMPUTER.PC);
     });
 
     await functionTime(() => {
-      // 10- luminar bus de direcciones y mostrar #dirección de instrucción ADD AL, BL
-      store.setComponent("AB");
-      store.setValue(store.currentinstruction.counter);
+      // 7- Iluminar UC
+      useStore.getState().setComponents("UC", "CB");
+      useStore.getState().setControlBusValue(InstruccionesControl.GetDatum);
+    });
+
+    await functionTime(() => {
+      // 7- Iluminar CB -> PM
+      useStore.getState().setComponents("CB", "PM");
+    });
+
+    await functionTime(() => {
+      // 7- Iluminar AB -> PM
+      useStore.getState().setComponents("AB", "PM");
+    });
+
+    await functionTime(() => {
+      useStore.getState().setComponents("PM", id);
+    });
+
+    await functionTime(() => {
+      useStore.getState().setComponents(id, "PM");
     });
 
     await functionTime(() => {
       // 11- En la memoria del programa aparece la instrucción | # | ADD Operando1, Operando2 |
-      // montanchez
-      store.setComponent("PM");
-      store.setValue(store.currentinstruction.counter);
-      // montanchez cierra
-    });
+      useStore.getState().setComponents("PM", "DB");
 
-    await functionTime(() => {
-      // 10- Iluminar bus de datos
-      store.setComponent("DB");
+      // Se muestra en el bus de datos lo que va a pasar al MBR,
+      useStore.getState().setDataBusValue({ codop, operand1, operand2 });
     });
 
     await functionTime(() => {
       // 12- Iluminar MBR
-      store.setComponent("MBR");
+      useStore.getState().setComponents("DB", "MBR");
+      useStore.getState().setMBRValue({ codop, operand1, operand2 });
     });
 
+    //no
     await functionTime(() => {
       // 14- Se ilumina el IR
-      store.setComponent("IR");
+      useStore.getState().setComponents("MBR", "IR");
+      useStore.getState().setIRValue({ codop, operand1, operand2 });
     });
-
-    // DICODE
 
     await functionTime(() => {
-      // se pasa al ciclo DI
+      // DI - Dicode Instruction
+      useStore.getState().setCurrentCycle("DI");
       // 15- Iluminar UC
       // 16- mostrar la instrucción decodificada CODOP 00000000, 00000101”
-      store.setCurrentCycle("DI");
-      store.setComponent("UC");
-      //MONTANCHEZ
-      // store.setValue(
-      //   `MOV ${RegisterAddress[register]}, ${(value & 0xff).toString(2).padStart(8, "0")}`,
-      // );
-      //MONTANCHEZ CIERRA
+      useStore.getState().setComponents("IR", "UC");
+      useStore.getState().setUCValue({ codop, operand1, operand2 });
     });
 
-    const { codop, operand1, type1, operand2, type2 } = instruction;
+    await functionTime(() => {
+      // 99- La UC esta decodificando
+      useStore.getState().setComponents("UC", "UC");
+    });
 
     switch (codop) {
-      case "ADD":
-        addInstruction(operand1, operand2, type1, type2);
-        break;
       case "MOV":
-        moveInstruction(operand1, operand2);
+        await moveInstruction(operand1, operand2);
+        break;
+      case "ADD":
+        await operationsInstructions(codop, operand1, operand2, type2);
         break;
       case "DEC":
-        //moveInstruction(operand1, operand2, type1, type2);
+        await operationsInstructions(codop, operand1, operand2, type2);
         break;
       case "DIV":
-        //moveInstruction(operand1, operand2, type1, type2);
+        await operationsInstructions(codop, operand1, operand2, type2);
         break;
       case "MUL":
-        //moveInstruction(operand1, operand2, type1, type2);
+        await operationsInstructions(codop, operand1, operand2, type2);
         break;
       case "CMP":
-        //moveInstruction(operand1, operand2, type1, type2);
-        break;
-      case "DEC":
         //moveInstruction(operand1, operand2, type1, type2);
         break;
       case "JMP":
         //moveInstruction(operand1, operand2, type1, type2);
         break;
       case "JNZ":
-        //moveInstruction(operand1, operand2, type1, type2);
+        await jumpNotZeroInstruction(operand1);
         break;
       case "JZ":
         //moveInstruction(operand1, operand2, type1, type2);
@@ -125,11 +127,15 @@ export const run = async () => {
       case "STORAGE":
         //moveInstruction(operand1, operand2, type1, type2);
         break;
+      case "MALUMA":
+        await malumaInstruction(operand1, type1);
+        // la accion de MALUMA es saltar a la sgte instruccion (no tiene CO, FO, EI, WO)
+        break;
 
       default:
         break;
     }
-  } while (
-    useStore.getState().currentinstruction.counter === instructions.length
-  );
+  } while (useStore.getState().COMPUTER.PC !== instructions.length - 1);
+
+  useStore.getState().setIsProgamRunning(false);
 };
