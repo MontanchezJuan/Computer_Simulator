@@ -252,7 +252,6 @@ export function Item({ children, id }: ItemProps) {
     case "MOV":
       return (
         <DefaultItem className="border-orange-600 bg-orange-400">
-          {currentItem.operand1}
           <select
             className="text-black"
             onChange={(e) => setOperand(id, "operand1", e.target.value)}
@@ -265,7 +264,6 @@ export function Item({ children, id }: ItemProps) {
               </option>
             ))}
           </select>
-          {currentItem.operand2}
           <input
             className="w-12 text-black"
             defaultValue={currentItem.operand2}
