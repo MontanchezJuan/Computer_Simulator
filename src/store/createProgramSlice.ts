@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { StateCreator } from "zustand";
 import { CODOPS } from "../interfaces/CODOP";
 
-export type TypeOperand = "NUMBER" | "REGISTER" | "FUNCTION";
+export type TypeOperand = "NUMBER" | "REGISTER" | "ASIGNFUNCTION" | "FUNCTION";
 
 export interface ProgramItem {
   codop: keyof typeof CODOPS;

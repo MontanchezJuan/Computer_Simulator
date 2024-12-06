@@ -1,7 +1,7 @@
 import { InstruccionesControl } from "../interfaces/CODOP";
 import useStore from "../store/useStore";
 import { functionTime } from "../utils/actions";
-import { jumpNotZeroInstruction } from "./jumpNotZeroInstruction";
+import { jumpsInstructions } from "./jumpsInstructions";
 import { malumaInstruction } from "./malumaInstruction";
 import { moveInstruction } from "./moveInstruction";
 import { operationsInstructions } from "./operationsInstructions";
@@ -13,7 +13,10 @@ export const run = async () => {
 
   do {
     // Siguiente instrucción
-    useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
+    await functionTime(() => {
+      useStore.getState().setComponents("UC", "PC");
+      useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
+    });
 
     const instruction = instructions[useStore.getState().COMPUTER.PC];
     // El MALUMA si utiliza el type1
@@ -113,13 +116,13 @@ export const run = async () => {
         //moveInstruction(operand1, operand2, type1, type2);
         break;
       case "JMP":
-        //moveInstruction(operand1, operand2, type1, type2);
+        await jumpsInstructions(codop, operand1);
         break;
       case "JNZ":
-        await jumpNotZeroInstruction(operand1);
+        await jumpsInstructions(codop, operand1);
         break;
       case "JZ":
-        //moveInstruction(operand1, operand2, type1, type2);
+        await jumpsInstructions(codop, operand1);
         break;
       case "LOAD":
         //moveInstruction(operand1, operand2, type1, type2);
@@ -128,7 +131,7 @@ export const run = async () => {
         //moveInstruction(operand1, operand2, type1, type2);
         break;
       case "MALUMA":
-        await malumaInstruction(operand1, type1);
+        await malumaInstruction();
         // la accion de MALUMA es saltar a la sgte instruccion (no tiene CO, FO, EI, WO)
         break;
 

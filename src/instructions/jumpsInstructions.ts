@@ -1,8 +1,12 @@
 import useStore from "../store/useStore";
 import { functionTime } from "../utils/actions";
+import { Alert } from "../utils/swal";
 
-// INSTRUCCION MOVE
-export const jumpNotZeroInstruction = async (operand1: string) => {
+// INSTRUCCION JUMP
+export const jumpsInstructions = async (
+  codop: "JZ" | "JNZ" | "JMP",
+  operand1: string,
+) => {
   await functionTime(() => {
     // EI - Execute Instruction
     useStore.getState().setCurrentCycle("EI");
@@ -11,20 +15,38 @@ export const jumpNotZeroInstruction = async (operand1: string) => {
   });
 
   // Verificar si hay una flag zero
-  if (useStore.getState().COMPUTER.PSW.zero) {
+  if (
+    (!useStore.getState().COMPUTER.PSW.zero && codop === "JNZ") ||
+    (useStore.getState().COMPUTER.PSW.zero && codop === "JZ") ||
+    codop === "JMP"
+  ) {
     await functionTime(() => {
       //! SI NO LO ENCUENTRA PUEDE RETORNAR -1!!!!!!
+      const itemsFiltered = useStore
+        .getState()
+        .items.filter((instruction) => instruction.type1 === "ASIGNFUNCTION");
+      if (!itemsFiltered) {
+        Alert({ text: "No se encontraron instancias a funciones" });
+        return;
+      }
+      const item = itemsFiltered.find(
+        (instruction) => instruction.operand1 === operand1,
+      );
+      if (!item) {
+        Alert({ text: "No se encontró la fila de memoria" });
+        return;
+      }
       const newAddress = useStore
         .getState()
-        .items.findIndex((instruction) => instruction.operand1 === operand1);
+        .items.findIndex((instruction) => instruction.id === item?.id);
+      if (!newAddress) {
+        Alert({ text: "No se encontró la dirección de la función" });
+        return;
+      }
       console.log(newAddress);
 
       useStore.getState().setComponents("UC", "PC");
-      useStore.getState().setPCValue(newAddress + 1);
-    });
-  } else if (!useStore.getState().COMPUTER.PSW.zero) {
-    await functionTime(() => {
-      useStore.getState().setPCValue(useStore.getState().COMPUTER.PC + 1);
+      useStore.getState().setPCValue(newAddress);
     });
   }
 

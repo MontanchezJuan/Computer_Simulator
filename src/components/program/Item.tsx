@@ -215,17 +215,38 @@ export function Item({ children, id }: ItemProps) {
 
     case "JMP":
       return (
-        <DefaultItem className="border-purple-600 bg-purple-400"></DefaultItem>
+        <DefaultItem className="border-purple-600 bg-purple-400">
+          <input
+            className="text-black"
+            defaultValue={currentItem.operand1}
+            onChange={(e) => setOperand(id, "operand1", e.target.value)}
+            disabled={isProgamRunning}
+          />
+        </DefaultItem>
       );
 
     case "JNZ":
       return (
-        <DefaultItem className="border-teal-600 bg-teal-400"></DefaultItem>
+        <DefaultItem className="border-teal-600 bg-teal-400">
+          <input
+            className="text-black"
+            defaultValue={currentItem.operand1}
+            onChange={(e) => setOperand(id, "operand1", e.target.value)}
+            disabled={isProgamRunning}
+          />
+        </DefaultItem>
       );
 
     case "JZ":
       return (
-        <DefaultItem className="border-pink-600 bg-pink-400"></DefaultItem>
+        <DefaultItem className="border-pink-600 bg-pink-400">
+          <input
+            className="text-black"
+            defaultValue={currentItem.operand1}
+            onChange={(e) => setOperand(id, "operand1", e.target.value)}
+            disabled={isProgamRunning}
+          />
+        </DefaultItem>
       );
 
     case "MOV":
