@@ -165,9 +165,6 @@ export const run = async () => {
       case "MUL":
         await operationsInstructions(codop, operand1, operand2, type2);
         break;
-      case "CMP":
-        //moveInstruction(operand1, operand2, type1, type2);
-        break;
       case "JMP":
         await jumpsInstructions(codop, operand1);
         break;
