@@ -4,8 +4,8 @@ export type PCComponent =
   | "MBR"
   | "UC"
   | "AB" // BUS DE DIRECCIONES
-  | "DB" // DATA BASE
-  | "CB" // CONTROL BASE
+  | "DB" // BUS DE DATOS
+  | "CB" // BUS DE CONTROL
   | "AL" // Registro AL
   | "BL" // Registro BL
   | "CL" // Registro CL

@@ -29,12 +29,7 @@ export const SortableItem = ({ id }: SortableItemProps) => {
     <div ref={setNodeRef} className="flex p-2" style={style}>
       <Item id={id}>
         {/* Botón de arrastre */}
-        <button
-          disabled={isProgamRunning}
-          className={baseClasses}
-          {...listeners}
-          {...attributes}
-        >
+        <button className={baseClasses} {...listeners} {...attributes}>
           <RiDragMove2Line />
         </button>
 

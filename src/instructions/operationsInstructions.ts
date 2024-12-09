@@ -18,6 +18,10 @@ export const operationsInstructions = async (
     useStore.getState().setCurrentCycle("EI");
     useStore.getState().setComponents("UC", operand1 as PCComponent);
   });
+  if (!useStore.getState().cancelProgram) {
+    useStore.getState().setPCValue(useStore.getState().items.length - 1);
+    return;
+  }
 
   await functionTime(() => {
     useStore.getState().setComponents(operand1 as PCComponent, "ALU");
@@ -28,6 +32,10 @@ export const operationsInstructions = async (
         useStore.getState().COMPUTER.RegisterBank[operand1 as Register],
       );
   });
+  if (!useStore.getState().cancelProgram) {
+    useStore.getState().setPCValue(useStore.getState().items.length - 1);
+    return;
+  }
 
   //CO-FO segundo dato
   // Si es un registro -->
@@ -42,6 +50,10 @@ export const operationsInstructions = async (
         await functionTime(() => {
           useStore.getState().setComponents("UC", operand2 as PCComponent);
         });
+        if (!useStore.getState().cancelProgram) {
+          useStore.getState().setPCValue(useStore.getState().items.length - 1);
+          return;
+        }
 
         // -3 setear ciclo EI
         // -4 Iluminar arista BR, ALU
@@ -59,6 +71,10 @@ export const operationsInstructions = async (
               useStore.getState().COMPUTER.RegisterBank[operand2 as Register],
             );
         });
+        if (!useStore.getState().cancelProgram) {
+          useStore.getState().setPCValue(useStore.getState().items.length - 1);
+          return;
+        }
       }
       break;
     case "NUMBER":
@@ -67,10 +83,18 @@ export const operationsInstructions = async (
           useStore.getState().setComponents("UC", "ALU");
           useStore.getState().setALUValue("B", Number(operand2));
         });
+        if (!useStore.getState().cancelProgram) {
+          useStore.getState().setPCValue(useStore.getState().items.length - 1);
+          return;
+        }
       }
       break;
     default:
       break;
+  }
+  if (!useStore.getState().cancelProgram) {
+    useStore.getState().setPCValue(useStore.getState().items.length - 1);
+    return;
   }
 
   switch (codop) {
@@ -124,6 +148,10 @@ export const operationsInstructions = async (
       }
       break;
   }
+  if (!useStore.getState().cancelProgram) {
+    useStore.getState().setPCValue(useStore.getState().items.length - 1);
+    return;
+  }
 
   // Actualizar el valor del operando1 con el reultado
   useStore
@@ -139,7 +167,15 @@ export const operationsInstructions = async (
     await functionTime(() => {
       useStore.getState().setComponents("ALU", "PSW");
     });
-  } else if (
+    if (!useStore.getState().cancelProgram) {
+      useStore.getState().setPCValue(useStore.getState().items.length - 1);
+      return;
+    }
+  } else {
+    useStore.getState().setPSWValue("zero", false);
+  }
+
+  if (
     useStore.getState().COMPUTER.ALU.result > 127 ||
     useStore.getState().COMPUTER.ALU.result < -127
   ) {
@@ -147,6 +183,12 @@ export const operationsInstructions = async (
     await functionTime(() => {
       useStore.getState().setComponents("ALU", "PSW");
     });
+    if (!useStore.getState().cancelProgram) {
+      useStore.getState().setPCValue(useStore.getState().items.length - 1);
+      return;
+    }
+  } else {
+    useStore.getState().setPSWValue("nan", false);
   }
 
   await functionTime(() => {
@@ -154,6 +196,10 @@ export const operationsInstructions = async (
     useStore.getState().setCurrentCycle("WO");
     useStore.getState().setComponents("ALU", operand1 as PCComponent);
   });
+  if (!useStore.getState().cancelProgram) {
+    useStore.getState().setPCValue(useStore.getState().items.length - 1);
+    return;
+  }
 
   return;
 };

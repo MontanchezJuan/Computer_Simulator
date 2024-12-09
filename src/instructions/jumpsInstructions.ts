@@ -13,6 +13,10 @@ export const jumpsInstructions = async (
     // Iluminar arista UC, PSW
     useStore.getState().setComponents("UC", "PSW");
   });
+  if (!useStore.getState().cancelProgram) {
+    useStore.getState().setPCValue(useStore.getState().items.length - 1);
+    return;
+  }
 
   // Verificar si hay una flag zero
   if (
@@ -21,14 +25,14 @@ export const jumpsInstructions = async (
     codop === "JMP"
   ) {
     await functionTime(() => {
-      //! SI NO LO ENCUENTRA PUEDE RETORNAR -1!!!!!!
       const itemsFiltered = useStore
         .getState()
         .items.filter((instruction) => instruction.type1 === "ASIGNFUNCTION");
-      if (!itemsFiltered) {
+      if (itemsFiltered.length === 0) {
         Alert({ text: "No se encontraron instancias a funciones" });
         return;
       }
+
       const item = itemsFiltered.find(
         (instruction) => instruction.operand1 === operand1,
       );
@@ -36,18 +40,21 @@ export const jumpsInstructions = async (
         Alert({ text: "No se encontró la fila de memoria" });
         return;
       }
+
       const newAddress = useStore
         .getState()
         .items.findIndex((instruction) => instruction.id === item?.id);
-      if (!newAddress) {
+      if (newAddress === -1) {
         Alert({ text: "No se encontró la dirección de la función" });
         return;
       }
-      console.log(newAddress);
-
       useStore.getState().setComponents("UC", "PC");
       useStore.getState().setPCValue(newAddress);
     });
+    if (!useStore.getState().cancelProgram) {
+      useStore.getState().setPCValue(useStore.getState().items.length - 1);
+      return;
+    }
   }
 
   return;
