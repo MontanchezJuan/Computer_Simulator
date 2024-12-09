@@ -1,5 +1,9 @@
 import { useCallback, useState } from "react";
-import { RiSettings3Fill, RiSettings4Fill } from "react-icons/ri";
+import {
+  RiErrorWarningFill,
+  RiSettings3Fill,
+  RiSettings4Fill,
+} from "react-icons/ri";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { cycleBgColors } from "../interfaces/Cycles";
 import useStore from "../store/useStore";
@@ -15,9 +19,12 @@ export const SettingsMenu = ({ children }: SettingsMenuProps) => {
     setShowMenu(false);
   }, []);
 
+  const isProgamRunning = useStore((store) => store.isProgamRunning);
   const currentCycle = useStore((store) => store.COMPUTER.currentCycle);
   const timeout = useStore((store) => store.COMPUTER.timeout);
+  const throwConfetti = useStore((store) => store.throwConfetti);
   const setTimeout = useStore((store) => store.setTimeout);
+  const setThrowConfetti = useStore((store) => store.setThrowConfetti);
 
   const menuRef = useClickOutside(closeMenu);
 
@@ -31,6 +38,16 @@ export const SettingsMenu = ({ children }: SettingsMenuProps) => {
           Ciclo actual: <span className="font-semibold">{currentCycle}</span>
         </p>
       </div>
+      {isProgamRunning && (
+        <button
+          className={`bottom-2 mr-4 flex max-w-[280px] items-center justify-center gap-2 rounded-lg border px-4 py-2 font-medium text-white shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 ${throwConfetti ? "border-gray-600 bg-gray-400" : "border-purple-800 bg-purple-600"}`}
+          onClick={() => setThrowConfetti()}
+          disabled={throwConfetti}
+        >
+          <RiErrorWarningFill />
+          Interrumpir programa
+        </button>
+      )}
       <div className="relative flex flex-col justify-end">
         <button
           onClick={() => setShowMenu(!showMenu)}

@@ -234,8 +234,8 @@ const createInstructionsSlice: StateCreator<InstructionsSlice> = (set) => ({
 
   // Resetear el valor del PC
   resetCOMPUTER: () =>
-    set(() => ({
-      COMPUTER: initialInstructions,
+    set((state) => ({
+      COMPUTER: { ...initialInstructions, timeout: state.COMPUTER.timeout },
     })),
 });
 

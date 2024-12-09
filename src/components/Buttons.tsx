@@ -11,7 +11,7 @@ export const Buttons = () => {
       title: "Almacenamiento",
       items: [
         { codop: "MOV", color: "border-orange-600 bg-orange-400" },
-        { codop: "STORAGE", color: "border-cyan-600 bg-cyan-400" },
+        { codop: "STORE", color: "border-cyan-600 bg-cyan-400" },
         { codop: "LOAD", color: "border-lime-600 bg-lime-400" },
       ],
     },
@@ -43,16 +43,21 @@ export const Buttons = () => {
           createItem({ codop, type1: "ASIGNFUNCTION", operand1: "function" });
         }
         break;
-        case "JNZ":
-          {
-            createItem({ codop, type1: "FUNCTION", operand1: "function" });
-          }
-          break;
-        case "JZ":
-          {
-            createItem({ codop, type1: "FUNCTION", operand1: "function" });
-          }
-          break;
+      case "JNZ":
+        {
+          createItem({ codop, type1: "FUNCTION", operand1: "function" });
+        }
+        break;
+      case "JZ":
+        {
+          createItem({ codop, type1: "FUNCTION", operand1: "function" });
+        }
+        break;
+      case "STORE":
+        {
+          createItem({ codop, type1: "NUMBER", operand1: "0" });
+        }
+        break;
 
       default:
         {

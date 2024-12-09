@@ -2,7 +2,7 @@
 export enum CODOPS {
   START = "00000000",
   MOV = "00000001",
-  STORAGE = "00000010",
+  STORE = "00000010",
   LOAD = "00000011",
   ADD = "00000100",
   DEC = "00000101",

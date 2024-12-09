@@ -21,12 +21,12 @@ export const Container = () => {
       strategy={verticalListSortingStrategy}
     >
       <div className="flex h-[90vh] flex-col">
-        <div className="w-fit rounded-t-lg bg-stone-500 p-2">
+        <div className="p-2 rounded-t-lg w-fit bg-stone-500">
           <h1 className="text-xl font-bold">Programa a ejecutar</h1>
         </div>
         <div
           ref={setNodeRef}
-          className="custom-scrollbar flex h-full flex-col overflow-y-auto rounded-b-lg rounded-tr-lg bg-stone-500 p-2"
+          className="custom-scrollbar flex h-full min-w-[280px] flex-col overflow-y-auto rounded-b-lg rounded-tr-lg bg-stone-500 p-2"
         >
           {items.map((item) => (
             <SortableItem key={item.id} id={item.id} />

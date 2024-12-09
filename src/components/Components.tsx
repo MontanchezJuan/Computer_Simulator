@@ -7,22 +7,28 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useEffect } from "react";
-import { RiPlayLargeFill } from "react-icons/ri";
+import { RiCloseFill, RiPlayLargeFill } from "react-icons/ri";
 import { initialEdges, initialNodes } from "../data/data";
 import { run } from "../instructions/runProgram";
 import { CODOPS } from "../interfaces/CODOP";
 import { cycleStrokeColors } from "../interfaces/Cycles";
+import { DataMemoryAddress } from "../interfaces/DataMemory";
 import { Register, RegisterAddress } from "../interfaces/RegisterBank";
 import useStore from "../store/useStore";
 import { getBinary } from "../utils/actions";
 import { Alert } from "../utils/swal";
 import {
   AddressNode,
+  ALUComponent,
   ALUNode,
   BusNode,
   ComputerNode,
+  CPUNode,
+  FlagNode,
   MemoryNode,
+  PCNode,
   PrincipalMemoryNode,
+  PSWNode,
   RegisterBankNode,
   RegisterNode,
 } from "./ComputerNode";
@@ -30,11 +36,16 @@ import { SettingsMenu } from "./SettingsMenu";
 
 const nodeTypes = {
   AddressNode,
+  ALUComponent,
   ALUNode,
   BusNode,
   ComputerNode,
+  CPUNode,
+  FlagNode,
   MemoryNode,
+  PCNode,
   PrincipalMemoryNode,
+  PSWNode,
   RegisterBankNode,
   RegisterNode,
 };
@@ -42,9 +53,13 @@ const nodeTypes = {
 export const Components = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  const cancelProgram = useStore((store) => store.cancelProgram);
   const COMPUTER = useStore((store) => store.COMPUTER);
-  const items = useStore((store) => store.items);
+  const dataMemory = useStore((store) => store.dataMemory);
   const isProgamRunning = useStore((store) => store.isProgamRunning);
+  const items = useStore((store) => store.items);
+  const setCancelProgram = useStore((store) => store.setCancelProgram);
   const setIsProgamRunning = useStore((store) => store.setIsProgamRunning);
 
   useEffect(() => {
@@ -53,20 +68,6 @@ export const Components = () => {
         const updatedNode = { ...node };
 
         if (node.id === "RegisterBank") return node;
-
-        if (node.id === "PC") {
-          const nodeValue = COMPUTER.PC;
-
-          if (nodeValue === -1) {
-            return {
-              ...updatedNode,
-              data: {
-                ...updatedNode.data,
-                value: getBinary(0),
-              },
-            };
-          }
-        }
 
         updatedNode.data = {
           ...updatedNode.data,
@@ -150,52 +151,98 @@ export const Components = () => {
     );
   }, [COMPUTER, setEdges]);
 
+  useEffect(() => {
+    const NODE_HEIGHT = 50;
+    const NODE_MARGIN = 10;
+
+    const newNodes = dataMemory.map((item, index) => ({
+      id: item.operand1,
+      type: "AddressNode",
+      position: {
+        x: 30,
+        y: index === 0 ? 50 : 50 + index * (NODE_HEIGHT + NODE_MARGIN),
+      },
+      data: {
+        label: DataMemoryAddress[item.operand1],
+        value: `${getBinary(item.operand2)}`,
+        active: false,
+      },
+      draggable: true,
+      parentId: "DM",
+    }));
+
+    setNodes((prevNodes) => [...prevNodes, ...newNodes]);
+  }, [dataMemory, setNodes]);
+
   const handleOnClick = () => {
-    if (items.length > 0) {
-      const NODE_HEIGHT = 50;
-      const NODE_MARGIN = 10;
-
-      const newNodes = items.map((item, index) => ({
-        id: item.id,
-        type: "AddressNode",
-        position: {
-          x: 10,
-          y: index === 0 ? 50 : 50 + index * (NODE_HEIGHT + NODE_MARGIN),
-        },
-        data: {
-          label: getBinary(index),
-          value: `${CODOPS[item.codop as keyof typeof CODOPS]} ${getBinary(item.operand1)} ${getBinary(item.operand2)}`,
-          active: false,
-        },
-        draggable: true,
-        parentId: "PM",
-      }));
-
-      setNodes((prevNodes) => [...prevNodes, ...newNodes]);
-      setIsProgamRunning(true);
-      run();
-    } else {
+    if (items.length === 0) {
       Alert({
         text: "Se debe ingresar por lo menos una instrucción al programa",
       });
+      return;
     }
+
+    const NODE_HEIGHT = 50;
+    const NODE_MARGIN = 10;
+
+    const newNodes = items.map((item, index) => ({
+      id: item.id,
+      type: "AddressNode",
+      position: {
+        x: 30,
+        y: index === 0 ? 50 : 50 + index * (NODE_HEIGHT + NODE_MARGIN),
+      },
+      data: {
+        label: getBinary(index),
+        value: `${CODOPS[item.codop as keyof typeof CODOPS]} ${getBinary(item.operand1)} ${getBinary(item.operand2)}`,
+        active: false,
+      },
+      draggable: false,
+      parentId: "PM",
+    }));
+
+    setNodes(() => [...initialNodes, ...newNodes]);
+    setIsProgamRunning(true);
+    run();
+  };
+
+  const handleCancel = () => {
+    setCancelProgram(false);
   };
 
   return (
     <div className="flex h-[90vh] flex-col">
-      <div className="w-fit rounded-t-lg bg-stone-500 p-2">
+      <div className="p-2 rounded-t-lg w-fit bg-stone-500">
         <h1 className="text-xl font-bold">Computador</h1>
       </div>
-      <div className="flex h-full flex-col gap-2 rounded-b-lg rounded-tr-lg bg-stone-500 p-2">
+      <div className="flex flex-col h-full gap-2 p-2 rounded-b-lg rounded-tr-lg bg-stone-500">
         <SettingsMenu>
-          <button
-            className={`bottom-2 flex max-w-[280px] items-center justify-center gap-2 rounded-lg border px-4 py-2 font-medium text-white shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 ${isProgamRunning ? "border-gray-600 bg-gray-400" : "border-green-600 bg-[#00ff66]"}`}
-            onClick={handleOnClick}
-            disabled={isProgamRunning}
-          >
-            <RiPlayLargeFill />
-            {isProgamRunning ? "Programa ejecutándose..." : "Ejecutar programa"}
-          </button>
+          {!isProgamRunning && (
+            <button
+              className={`bottom-2 flex max-w-[280px] items-center justify-center gap-2 rounded-lg border px-4 py-2 font-medium text-white shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 ${isProgamRunning ? "border-gray-600 bg-gray-400" : "border-green-600 bg-[#00ff66]"}`}
+              onClick={handleOnClick}
+              disabled={isProgamRunning}
+            >
+              <RiPlayLargeFill />
+              Ejecutar programa
+            </button>
+          )}
+          {isProgamRunning && (
+            <button
+              className={`bottom-2 flex max-w-[280px] items-center justify-center gap-2 rounded-lg border px-4 py-2 font-medium text-white shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 ${!cancelProgram ? "border-gray-600 bg-gray-400" : "border-red-600 bg-red-400"}`}
+              onClick={handleCancel}
+              disabled={!cancelProgram}
+            >
+              {cancelProgram ? (
+                <>
+                  <RiCloseFill />
+                  Cancelar ejecución
+                </>
+              ) : (
+                "Cancelando ejecución"
+              )}
+            </button>
+          )}
         </SettingsMenu>
 
         <div className="h-full w-[300px] rounded-md md:w-[800px]">

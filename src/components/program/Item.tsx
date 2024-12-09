@@ -335,9 +335,56 @@ export function Item({ children, id }: ItemProps) {
         <DefaultItem className="border-lime-600 bg-lime-400"></DefaultItem>
       );
 
-    case "STORAGE":
+    case "STORE":
       return (
-        <DefaultItem className="border-cyan-600 bg-cyan-400"></DefaultItem>
+        <DefaultItem className="border-cyan-600 bg-cyan-400">
+          <select
+            className="text-black"
+            onChange={(e) => setOperand(id, "operand1", e.target.value)}
+            defaultValue={currentItem.operand1}
+            disabled={isProgamRunning}
+          >
+            {Array.from({ length: 128 }, (_, i) => (
+              <option value={`${i}`}>{i}</option>
+            ))}
+          </select>
+          <select
+            className="text-black"
+            defaultValue={currentItem.type2}
+            onChange={(e) =>
+              setType(id, "type2", e.target.value as TypeOperand)
+            }
+            disabled={isProgamRunning}
+          >
+            <option value="REGISTER">REGISTER</option>
+            <option value="NUMBER">NUMBER</option>
+          </select>
+          {currentItem.type2 === "REGISTER" && (
+            <select
+              className="text-black"
+              defaultValue={currentItem.operand2}
+              onChange={(e) => setOperand(id, "operand2", e.target.value)}
+              disabled={isProgamRunning}
+            >
+              {registerOptions.map((reg) => (
+                <option key={reg} value={reg}>
+                  {reg}
+                </option>
+              ))}
+            </select>
+          )}
+          {currentItem.type2 === "NUMBER" && (
+            <input
+              className="w-12 text-black"
+              defaultValue={currentItem.operand2}
+              onChange={(e) => setOperand(id, "operand2", e.target.value)}
+              type="number"
+              max={127}
+              min={-127}
+              disabled={isProgamRunning}
+            />
+          )}
+        </DefaultItem>
       );
 
     case "MALUMA":
