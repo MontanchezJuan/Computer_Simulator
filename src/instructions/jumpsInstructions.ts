@@ -2,63 +2,105 @@ import useStore from "../store/useStore";
 import { functionTime } from "../utils/actions";
 import { Alert } from "../utils/swal";
 
-// INSTRUCCION JUMP
 export const jumpsInstructions = async (
   codop: "JZ" | "JNZ" | "JMP",
   operand1: string,
 ) => {
+  // Validar el operando
+  if (!operand1 || operand1.trim() === "") {
+    Alert({
+      text: `El operando es inválido, asegúrate de que el operando no sea null o esté vacío.
+INSTRUCCIÓN: ${codop}`,
+    });
+    console.error("Error: Operando inválido. INSTRUCCIÓN:", codop);
+    return;
+  }
+
+  // Ciclo de instrucción: EI
   await functionTime(() => {
-    // EI - Execute Instruction
     useStore.getState().setCurrentCycle("EI");
-    // Iluminar arista UC, PSW
     useStore.getState().setComponents("UC", "PSW");
   });
+
+  // Verificar si el programa fue cancelado
   if (!useStore.getState().cancelProgram) {
     useStore.getState().setPCValue(useStore.getState().items.length - 1);
     return;
   }
 
-  // Verificar si hay una flag zero
+  // Verificar la condición del salto
+  const isZero = useStore.getState().COMPUTER.PSW.zero;
+
   if (
-    (!useStore.getState().COMPUTER.PSW.zero && codop === "JNZ") ||
-    (useStore.getState().COMPUTER.PSW.zero && codop === "JZ") ||
+    (codop === "JNZ" && !isZero) ||
+    (codop === "JZ" && isZero) ||
     codop === "JMP"
   ) {
-    await functionTime(() => {
+    await functionTime(async () => {
       const itemsFiltered = useStore
         .getState()
         .items.filter((instruction) => instruction.type1 === "ASIGNFUNCTION");
+
+      // Verificar si existen funciones en la memoria
       if (itemsFiltered.length === 0) {
-        Alert({ text: "No se encontraron instancias a funciones" });
+        Alert({
+          text: `No se encontraron funciones en la memoria.
+INSTRUCCIÓN: ${codop}, OPERANDO: ${operand1}`,
+        });
+        console.warn("No se encontraron funciones en la memoria.");
         return;
       }
 
+      // Buscar función asociada al operando
       const item = itemsFiltered.find(
         (instruction) => instruction.operand1 === operand1,
       );
       if (!item) {
-        Alert({ text: "No se encontró la fila de memoria" });
+        Alert({
+          text: `No se encontró la función asociada al operando.
+INSTRUCCIÓN: ${codop}, OPERANDO: ${operand1}`,
+        });
+        console.warn(
+          "No se encontró la función asociada al operando:",
+          operand1,
+        );
         return;
       }
 
+      // Buscar la dirección de memoria de la función
       const newAddress = useStore
         .getState()
-        .items.findIndex((instruction) => instruction.id === item?.id);
+        .items.findIndex((instruction) => instruction.id === item.id);
+
       if (newAddress === -1) {
-        Alert({ text: "No se encontró la dirección de la función" });
+        Alert({
+          text: `No se encontró la dirección de memoria de la función.
+INSTRUCCIÓN: ${codop}, OPERANDO: ${operand1}, FUNCIÓN: ${item.id}`,
+        });
+        console.error(
+          "No se encontró la dirección de memoria para la función:",
+          item.id,
+        );
         return;
       }
+
+      // Actualizar el PC y los componentes
       useStore.getState().setComponents("UC", "PC");
       useStore.getState().setPCValue(newAddress);
     });
+
+    // Verificar si el programa fue cancelado después de actualizar el PC
     if (!useStore.getState().cancelProgram) {
       useStore.getState().setPCValue(useStore.getState().items.length - 1);
       return;
     }
+  } else {
+    console.error(
+      `El salto no fue realizado. INSTRUCCIÓN: ${codop}, Zero Flag: ${isZero}`,
+    );
   }
-
-  return;
 };
+
 /*
 EI (JNZ)
 

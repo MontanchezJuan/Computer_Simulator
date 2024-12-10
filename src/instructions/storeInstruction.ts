@@ -45,7 +45,7 @@ export const storeInstruction = async (
     // 5.1- mostrar en el MBR el dato inmediato que se va a guardar
   } else {
     await functionTime(() => {
-      useStore.getState().setComponents("UC", operand1 as PCComponent);
+      useStore.getState().setComponents("UC", operand2 as PCComponent);
     });
     if (!useStore.getState().cancelProgram) {
       useStore.getState().setPCValue(useStore.getState().items.length - 1);
@@ -53,13 +53,13 @@ export const storeInstruction = async (
     }
 
     await functionTime(() => {
-      useStore.getState().setComponents(operand1 as PCComponent, "MBR");
+      useStore.getState().setComponents(operand2 as PCComponent, "MBR");
       useStore.getState().setMBRValue({
         codop,
-        operand1: useStore
+        operand1,
+        operand2: useStore
           .getState()
-          .COMPUTER.RegisterBank[operand1 as Register].toString(),
-        operand2,
+          .COMPUTER.RegisterBank[operand2 as Register].toString(),
       });
     });
     if (!useStore.getState().cancelProgram) {
@@ -126,10 +126,20 @@ export const storeInstruction = async (
   await functionTime(() => {
     useStore.getState().setComponents("DB", "DM");
     // 16- Se muestra el dato en memoria de datos ej: | 0  | 12  | (en binario)
-    useStore.getState().updateDataItem({
-      operand1: operand1 as DataMemory,
-      operand2: Number(operand2),
-    });
+    if (type2 === "NUMBER") {
+      useStore.getState().updateDataItem({
+        operand1: operand1 as DataMemory,
+        operand2: Number(operand2),
+      });
+      useStore.getState().setComponents("DM", operand2);
+    } else {
+      useStore.getState().updateDataItem({
+        operand1: operand1 as DataMemory,
+        operand2:
+          useStore.getState().COMPUTER.RegisterBank[operand2 as Register],
+      });
+      useStore.getState().setComponents("DM", operand2);
+    }
   });
   if (!useStore.getState().cancelProgram) {
     useStore.getState().setPCValue(useStore.getState().items.length - 1);

@@ -100,11 +100,6 @@ export function Item({ children, id }: ItemProps) {
         </DefaultItem>
       );
 
-    case "CMP":
-      return (
-        <DefaultItem className="border-blue-600 bg-blue-400"></DefaultItem>
-      );
-
     case "DEC":
       return (
         <DefaultItem className="border-yellow-600 bg-yellow-400">
@@ -332,7 +327,31 @@ export function Item({ children, id }: ItemProps) {
 
     case "LOAD":
       return (
-        <DefaultItem className="border-lime-600 bg-lime-400"></DefaultItem>
+        <DefaultItem className="border-lime-600 bg-lime-400">
+          <select
+            className="text-black"
+            onChange={(e) => setOperand(id, "operand1", e.target.value)}
+            defaultValue={currentItem.operand1}
+            disabled={isProgamRunning}
+          >
+            {registerOptions.map((reg) => (
+              <option key={reg} value={reg}>
+                {reg}
+              </option>
+            ))}
+          </select>
+
+          <select
+            className="text-black"
+            defaultValue={currentItem.operand2}
+            onChange={(e) => setOperand(id, "operand2", e.target.value)}
+            disabled={isProgamRunning}
+          >
+            {Array.from({ length: 128 }, (_, i) => (
+              <option value={`${i}`}>{i}</option>
+            ))}
+          </select>
+        </DefaultItem>
       );
 
     case "STORE":

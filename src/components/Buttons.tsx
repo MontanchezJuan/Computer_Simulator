@@ -31,7 +31,6 @@ export const Buttons = () => {
         { codop: "DEC", color: "border-yellow-600 bg-yellow-400" },
         { codop: "MUL", color: "border-indigo-600 bg-indigo-400" },
         { codop: "DIV", color: "border-red-600 bg-red-400" },
-        { codop: "CMP", color: "border-blue-600 bg-blue-400" },
       ],
     },
   ];
@@ -56,6 +55,17 @@ export const Buttons = () => {
       case "STORE":
         {
           createItem({ codop, type1: "NUMBER", operand1: "0" });
+        }
+        break;
+      case "LOAD":
+        {
+          createItem({
+            codop,
+            type1: "REGISTER",
+            operand1: "AL",
+            type2: "NUMBER",
+            operand2: "0",
+          });
         }
         break;
 
